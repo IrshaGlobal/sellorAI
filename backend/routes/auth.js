@@ -28,7 +28,7 @@ router.post('/register', async (req, res) => {
   if (!/\S+@\S+\.\S+/.test(email)) {
     return res.status(400).json({ message: 'Invalid email format.' });
   }
-
+  
   const subdomain = generateSubdomain(storeName);
   if (!subdomain) {
     return res.status(400).json({ message: 'Invalid store name for generating a subdomain.' });
@@ -69,8 +69,8 @@ router.post('/register', async (req, res) => {
 
       // Create Store
       const storeQuery = `
-        INSERT INTO Stores (store_name, subdomain, contact_email, created_at, updated_at)
-        VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        INSERT INTO Stores (store_name, subdomain, contact_email, created_at, updated_at) 
+        VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) 
         RETURNING store_id, store_name, subdomain, created_at;
       `;
       const storeValues = [storeName, subdomain, email];
@@ -79,8 +79,8 @@ router.post('/register', async (req, res) => {
 
       // Create Vendor
       const vendorQuery = `
-        INSERT INTO Vendors (email, password_hash, store_id, created_at, updated_at)
-        VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        INSERT INTO Vendors (email, password_hash, store_id, created_at, updated_at) 
+        VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) 
         RETURNING vendor_id, email, store_id, created_at;
       `;
       const vendorValues = [email, passwordHash, newStore.store_id];
@@ -131,9 +131,74 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Placeholder for login (will be implemented later)
-router.post('/login', (req, res) => {
-  res.status(501).json({ message: 'Login endpoint not implemented yet.' });
+// POST /api/auth/login
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  // 1. Validate input
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required.' });
+  }
+  if (!/\S+@\S+\.\S+/.test(email)) {
+    return res.status(400).json({ message: 'Invalid email format.' });
+  }
+
+  try {
+    // 2. Find vendor by email
+    const vendorResult = await db.query('SELECT * FROM Vendors WHERE email = $1', [email]);
+    if (vendorResult.rows.length === 0) {
+      return res.status(401).json({ message: 'Invalid email or password.' }); // User not found
+    }
+    const vendor = vendorResult.rows[0];
+
+    // 3. Compare password with stored hash
+    const isMatch = await bcrypt.compare(password, vendor.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password.' }); // Incorrect password
+    }
+
+    // 4. Fetch associated store details (needed for JWT and response)
+    const storeResult = await db.query('SELECT store_id, store_name, subdomain FROM Stores WHERE store_id = $1', [vendor.store_id]);
+    if (storeResult.rows.length === 0) {
+      // This should ideally not happen if data integrity is maintained
+      console.error('Store not found for vendor:', vendor.vendor_id);
+      return res.status(500).json({ message: 'Error retrieving store details.' });
+    }
+    const store = storeResult.rows[0];
+
+    // 5. Generate JWT token
+    const tokenPayload = {
+      vendorId: vendor.vendor_id,
+      email: vendor.email,
+      storeId: store.store_id,
+      subdomain: store.subdomain,
+    };
+    const jwtSecret = process.env.JWT_SECRET;
+     if (!jwtSecret) {
+        console.error("JWT_SECRET is not defined in environment variables.");
+        return res.status(500).json({ message: "Server configuration error: JWT secret missing." });
+    }
+    const token = jwt.sign(tokenPayload, jwtSecret, { expiresIn: '1d' });
+
+    // 6. Return token and basic user/store info
+    res.status(200).json({
+      message: 'Login successful!',
+      token,
+      vendor: {
+        id: vendor.vendor_id,
+        email: vendor.email,
+      },
+      store: {
+        id: store.store_id,
+        name: store.store_name,
+        subdomain: store.subdomain,
+      }
+    });
+
+  } catch (error) {
+    console.error('Login Error:', error);
+    res.status(500).json({ message: 'Internal server error during login.' });
+  }
 });
 
 module.exports = router;
