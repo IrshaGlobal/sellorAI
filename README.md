@@ -1,0 +1,2 @@
+# sellorAI
+Multivendor SaaS AI
