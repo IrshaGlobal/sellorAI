@@ -100,15 +100,15 @@ export default function RegisterPage() {
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
           />
         </div>
-        <button
-          type="submit"
+        <button 
+          type="submit" 
           disabled={loading}
-          style={{
-            padding: '10px 20px',
-            color: 'white',
-            backgroundColor: '#0070f3',
-            border: 'none',
-            borderRadius: '5px',
+          style={{ 
+            padding: '10px 20px', 
+            color: 'white', 
+            backgroundColor: '#0070f3', 
+            border: 'none', 
+            borderRadius: '5px', 
             cursor: 'pointer',
             width: '100%'
           }}

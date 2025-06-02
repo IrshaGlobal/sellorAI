@@ -80,15 +80,19 @@ The project is organized into two main parts:
 *   **Admin Login:** `http://localhost:3000/admin/login` (Admin panel is basic structure only at this stage).
 *   **Backend API Base URL:** `http://localhost:3001`
 
-## Current Functionality (Vendor Registration Flow)
+## Current Functionality (Vendor Registration & Login Flow)
 
 *   Users can visit the landing page.
 *   Users can click "Create Your Store Now" to go to the registration page.
 *   On the registration page, users can enter a store name, email, and password.
-*   The backend will validate this information, create a new store and vendor record in the PostgreSQL database, and return a JWT.
-*   The frontend stores this JWT in localStorage and redirects the user to their dashboard page.
-*   The dashboard page has basic protection; if no JWT is found, it redirects to a login page.
-*   A logout button on the dashboard clears the JWT and redirects to login.
+*   The backend validates this information, creates a new store and vendor record in the PostgreSQL database, and returns a JWT.
+*   The frontend stores this JWT in localStorage and redirects the user to their dashboard page with a success message.
+*   Users can logout from the dashboard, which clears the JWT and redirects to the login page with a success message.
+*   On the login page, registered users can enter their email and password.
+*   The backend validates credentials, and if correct, issues a new JWT.
+*   The frontend stores the JWT and redirects to the dashboard with a success message.
+*   The dashboard page has basic protection; if no JWT is found, it redirects to the login page.
+*   If a logged-in user tries to access the login or registration page, they are redirected to their dashboard.
 
 ## Technology Stack
 

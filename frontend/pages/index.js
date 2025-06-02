@@ -9,14 +9,14 @@ export default function HomePage() {
           Upload an image, our AI does the rest. Start selling today!
         </p>
         <Link href="/register" passHref>
-          <button
-            style={{
-              padding: '15px 30px',
-              fontSize: '1.1em',
-              color: 'white',
-              backgroundColor: '#0070f3',
-              border: 'none',
-              borderRadius: '5px',
+          <button 
+            style={{ 
+              padding: '15px 30px', 
+              fontSize: '1.1em', 
+              color: 'white', 
+              backgroundColor: '#0070f3', 
+              border: 'none', 
+              borderRadius: '5px', 
               cursor: 'pointer',
               marginTop: '20px'
             }}
