@@ -12,6 +12,7 @@ const authRoutes = require('./routes/auth');
 const vendorRoutes = require('./routes/vendors');
 const productRoutes = require('./routes/products');
 const adminRoutes = require('./routes/admin'); // New admin route import
+const aiHelperRoutes = require('./routes/aiHelperRoutes'); // Added AI routes
 
 // Middleware to parse JSON
 app.use(express.json());
@@ -21,6 +22,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/admin', adminRoutes); // New admin route usage
+app.use('/api/ai', aiHelperRoutes); // Added AI routes
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
